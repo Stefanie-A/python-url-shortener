@@ -1,13 +1,17 @@
-# URI shortener
+""" 
+Python URI shortener
+"""
 import hashlib
 
 
 def url_shortener(long_url):
-    #URI function
+    """
+    URI function
+
+    """
     hash_object = hashlib.md5(long_url.encode())
     hash_digest = hash_object.hexdigest()
     short_url = hash_digest[:5]
-
     base_url = "http://short_url/" #replace with your domain name
     return f"{base_url}{short_url}"
 

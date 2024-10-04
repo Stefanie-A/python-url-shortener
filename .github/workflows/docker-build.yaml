@@ -11,4 +11,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Image
-        run: docker build ./python-uri-shortner/ -t uriimage:latest
+        run: docker build -f /python-uri-shortner/Dockerfile -t uri-image:latest

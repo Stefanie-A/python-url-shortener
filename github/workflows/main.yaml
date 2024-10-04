@@ -1,2 +1,15 @@
 name: Lint test
 on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    workflow_dispatch
+
+jobs:
+  runs-on: ubuntu-latest
+  steps:
+    - name: checkout
+    - uses: actions/checkout@v4

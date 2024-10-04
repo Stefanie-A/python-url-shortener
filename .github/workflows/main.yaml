@@ -1,9 +1,9 @@
 name: Lint test
 on:
-  # [workflow_dispatch]
-  push:
-    branches:
-      - main
+  [push]
+  # push:
+  #   branches:
+  #     - main
   # pull_request:
   #   branches:
   #     - main

@@ -3,7 +3,8 @@ Python URI shortener
 """
 import hashlib
 
-long_url = input("Enter the URL to shorten: ")
+input_url = input("Enter the URL to shorten: ")
+
 def url_shortener(long_url):
     """
     URI function
@@ -16,7 +17,7 @@ def url_shortener(long_url):
     return f"{base_url}{short_url}"
 
 
-SHORT_URI = url_shortener(long_url)
+SHORT_URI = url_shortener(input_url)
 
 if __name__ == "__main__":
     print(f"Shortened URL: {SHORT_URI}" )

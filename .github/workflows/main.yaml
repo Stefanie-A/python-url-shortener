@@ -1,12 +1,13 @@
 name: Lint test
 on:
+  [workflow_dispatch]
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
-    workflow_dispatch
+
 
 jobs:
   runs-on: ubuntu-latest

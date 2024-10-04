@@ -10,7 +10,9 @@ on:
 
 
 jobs:
-  runs-on: ubuntu-latest
-  steps:
-    - name: checkout
-    - uses: actions/checkout@v4
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+      - uses: actions/checkout@v4
+        run: echo "Successful!"

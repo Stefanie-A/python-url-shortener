@@ -16,4 +16,4 @@ long_url = input("Enter the URL to shorten: ")
 SHORT_URI = url_shortener(long_url)
 
 if __name__ == "__main__":
-    print(f"Shortened URL:" {SHORT_URI})
+    print(f"Shortened URL: {SHORT_URI}" )

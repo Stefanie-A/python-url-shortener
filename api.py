@@ -2,8 +2,8 @@
 API to get all urls
 
 """
-from main import table
 from fastapi import FastAPI
+from main import table
 
 app = FastAPI()
 

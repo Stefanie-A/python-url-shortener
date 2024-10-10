@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS build
+FROM python:3.12-slim AS build1
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY . .
 CMD ["python", "main.py"]
 
 
-FROM build As build1
+FROM build1 As build2
 
 COPY requirements.txt .
 

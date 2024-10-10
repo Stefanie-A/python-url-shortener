@@ -2,6 +2,10 @@
 Python URI shortener
 """
 import hashlib
+import boto3
+
+dynamoDB = boto3.resource('dynamodb')
+table = dynamoDB.Table('newURI')
 
 input_url = input("Enter the URL to shorten: ")
 
@@ -21,3 +25,12 @@ SHORT_URI = url_shortener(input_url)
 
 if __name__ == "__main__":
     print(f"Shortened URL: {SHORT_URI}" )
+
+
+def update_table(table):
+    table.put_item(
+            Item={
+                'id': '1',
+                'shorturl' : SHORT_URI
+                }
+        )

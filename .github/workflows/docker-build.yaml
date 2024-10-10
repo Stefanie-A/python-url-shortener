@@ -11,4 +11,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Image
-        run: docker build . --file Dockerfile -t uri-image:latest
+        run: docker build . --file Dockerfile --target build-t uri-image:latest

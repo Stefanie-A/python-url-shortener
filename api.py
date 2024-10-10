@@ -1,4 +1,8 @@
-from main import *
+"""
+API to get all urls
+
+"""
+from main import table
 from fastapi import FastAPI
 
 app = FastAPI()

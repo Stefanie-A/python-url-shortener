@@ -7,7 +7,7 @@ COPY . .
 CMD ["python", "main.py"]
 
 
-FROM builder As build1
+FROM build As build1
 
 COPY requirements.txt .
 

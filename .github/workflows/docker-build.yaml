@@ -17,10 +17,14 @@ jobs:
       - name: push to dockerhub
         run: |
           docker login -u stefnie -p ${{ secrets.docker_hub_token }}
-          docker tag uri-image:latest stefnie/uri-image:latest
-          docker tag api-image:latest stefnie/api-image:latest
-          docker push stefnie/uri-image:latest
-          docker push stefnie/api-image:latest
+          if [[ "$(docker images -q uri-image:latest 2> /dev/null)" != "" ]]; then            
+            docker tag uri-image:latest stefnie/uri-image:latest
+            docker push stefnie/uri-image:latest
+          fi
+          if [[ "$(docker images -q api-image:latest 2> /dev/null)" != "" ]]; then
+            docker tag api-image:latest stefnie/api-image:latest
+            docker push stefnie/api-image:latest
+          fi
 
   Docker-compose:
     runs-on: ubuntu-latest

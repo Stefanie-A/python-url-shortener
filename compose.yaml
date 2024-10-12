@@ -1,14 +1,14 @@
 version: "2.28"
 services:
   api:
-    image: uri-image:latest
+    image: stefnie/uri-image:latest
     container_name: build1
     volumes:
       - ./main.py /app
 
 
   backend:
-    image: api-image:latest
+    image: stefnie/api-image:latest
     container_name: build2
     ports:
       - 8036:81

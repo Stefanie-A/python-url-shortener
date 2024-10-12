@@ -31,4 +31,6 @@ jobs:
           sudo apt-get install -y docker-compose
           docker-compose --version
       - name: run containers
-        run: docker-compose -f compose.yaml up
+        run: |
+          docker-compose -f compose.yaml pull
+          docker-compose -f compose.yaml up -d

@@ -9,7 +9,7 @@ table = dynamoDB.Table('newURI')
 
 input_url = input("Enter the URL to shorten: ")
 
-def url_shortener(long_url):
+def generate_short_url(long_url):
     """
     URI function
 
@@ -31,6 +31,12 @@ def update_table(table):
                 'shorturl' : SHORT_URI
                 }
         )
+
+try:
+    update_table(table)
+except Exception as e:
+    print(f"Error updating table: {e}")
+
 
 if __name__ == "__main__":
     print(f"Shortened URL: {SHORT_URI}" )

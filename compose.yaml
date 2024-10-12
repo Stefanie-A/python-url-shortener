@@ -3,8 +3,14 @@ services:
   api:
     image: uri-image:latest
     container_name: build1
+    volumes:
+      - ./main.py /app
 
 
   backend:
-    image: uri-image:latest
+    image: api-image:latest
     container_name: build2
+    ports:
+      - 8036:81
+    volumes:
+      - ./api.py /app

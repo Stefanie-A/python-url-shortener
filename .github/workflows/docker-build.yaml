@@ -10,16 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build Image
-        run: docker build . --file Dockerfile --target build1 -t uri-image:latest
-
-  Docker-api-build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build Image
-        run: docker build . --file Dockerfile --target build2 -t api-image:latest
-
+      - name: Build Images
+        run: |
+          docker build . --file Dockerfile --target build1 -t uri-image:latest
+          docker build . --file Dockerfile --target build2 -t api-image:latest
+      - name: push to dockerhub
+        run: |
+          docker login -u stefnie -p ${{ secrets.docker_hub_token }}
+          docker push uri-image:latest
+          docker push api-image:latest
 
   Docker-compose:
     runs-on: ubuntu-latest

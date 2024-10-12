@@ -17,6 +17,8 @@ jobs:
       - name: push to dockerhub
         run: |
           docker login -u stefnie -p ${{ secrets.docker_hub_token }}
+          docker tag uri-image:latest stefnie/uri-image:latest
+          docker tag api-image:latest stefnie/api-image:latest
           docker push stefnie/uri-image:latest
           docker push stefnie/api-image:latest
 

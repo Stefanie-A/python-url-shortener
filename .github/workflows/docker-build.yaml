@@ -25,9 +25,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Docker Compose
-      - uses: KengoTODA/actions-setup-docker-compose@v1
-        with:
-          version: '2.14.2' # the full version of `docker-compose` command
       - name: run containers
-        run: docker-compose up
+        run: docker-compose -f compose.yaml up

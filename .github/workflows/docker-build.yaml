@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Images
         run: |
-          docker build docker/Dockerfile --target build1 -t uri-image:latest
+          docker build docker/Dockerfile --file Dockerfile --target build1 -t uri-image:latest
           docker build docker/Dockerfile --file Dockerfile --target build2 -t api-image:latest
       - name: push to dockerhub
         run: |

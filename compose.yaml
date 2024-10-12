@@ -1,10 +1,10 @@
 version: "2.28"
-service:
+services:
   api:
     image: uri-image:latest
-    container-name:build1
+    container_name: build1
 
 
   backend:
     image: uri-image:latest
-    container-name: build2
+    container_name: build2

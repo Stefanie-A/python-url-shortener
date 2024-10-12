@@ -32,5 +32,6 @@ jobs:
           docker-compose --version
       - name: run containers
         run: |
+          docker login -u stefnie -p ${{ secrets.docker_hub_token }}
           docker-compose -f compose.yaml pull
           docker-compose -f compose.yaml up -d

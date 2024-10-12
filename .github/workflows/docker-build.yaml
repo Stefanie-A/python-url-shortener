@@ -14,16 +14,16 @@ jobs:
         run: docker build . --file Dockerfile --target build1 -t uri-image:latest
 
   Docker-api-build:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - name: Build Image
-          run: docker build . --file Dockerfile --target build2 -t api-image:latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Image
+        run: docker build . --file Dockerfile --target build2 -t api-image:latest
 
 
   Docker-compose:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkoutv@4
-        - name: run containers
-          run: docker-compose up
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkoutv@4
+      - name: run containers
+        run: docker-compose up

@@ -23,9 +23,6 @@ def url_shortener(long_url):
 
 SHORT_URI = url_shortener(input_url)
 
-if __name__ == "__main__":
-    print(f"Shortened URL: {SHORT_URI}" )
-
 
 def update_table(table):
     table.put_item(
@@ -34,3 +31,8 @@ def update_table(table):
                 'shorturl' : SHORT_URI
                 }
         )
+
+if __name__ == "__main__":
+    print(f"Shortened URL: {SHORT_URI}" )
+
+

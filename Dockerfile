@@ -9,7 +9,7 @@ CMD ["python", "main.py"]
 
 FROM build1 As build2
 
-COPY requirements.txt .
+COPY ./app/requirements.txt .
 
 RUN pip install -r requirements.txt
 

@@ -6,15 +6,9 @@ jobs:
   EC2 Deployment:
     runs-on: ubuntu-latest
     steps:
-      - uses: bitovi/github-actions-deploy-docker-to-ec2@v1.0.1
+      - uses: actions/checkout@v4
       - name: Deploy to EC2         
-        with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_default_region: us-east-1
-          host: ${{ secrets.EC2_HOST }}
-          username: ec2-user
-          key_file: ${{ secrets.EC2_KEY }}
+        
       - name: SSH into EC2 and run deployment
         run: |
           ssh -i ${{ secrets.EC2_KEY }} ec2-user@${{ secrets.EC2_HOST }}

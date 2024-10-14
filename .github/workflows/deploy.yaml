@@ -3,7 +3,7 @@ on:
   [workflow_dispatch]
 
 jobs:
-  EC2 Deployment:
+  Deployment:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code

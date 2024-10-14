@@ -6,9 +6,8 @@ jobs:
   EC2 Deployment:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to EC2         
-        
+      - name: checkout code
+        uses: actions/checkout@v4         
       - name: SSH into EC2 and run deployment
         run: |
           ssh -i ${{ secrets.EC2_KEY }} ec2-user@${{ secrets.EC2_HOST }}

@@ -10,11 +10,11 @@ jobs:
         uses: actions/checkout@v4         
       - name: SSH into EC2 and run deployment
         run: |
-          ssh -i ${{ secrets.EC2_KEY }} ec2-user@${{ secrets.EC2_HOST }}
-          sudo apt update -y
-          sudo apt install docker.io -y
-          sudo apt install docker-compose-plugin
-          docker pull stefnie/api-image:latest
-          docker pull stefnie/uri-image:latest
-          docker-compose -f compose.yaml up -d
-          
+          ssh -i ${{ secrets.EC2_KEY }} ec2-user@${{ secrets.EC2_HOST }} << EOF
+            sudo apt update -y
+            sudo apt install docker.io -y
+            sudo apt install docker-compose-plugin
+            docker pull stefnie/api-image:latest
+            docker pull stefnie/uri-image:latest
+            docker-compose -f compose.yaml up -d
+          EOF

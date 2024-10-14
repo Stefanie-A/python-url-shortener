@@ -11,7 +11,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.HOST_USERNAME }}
-          key: ${{ secrets.EC2_KEY }}
+          key_path: ./id_rsa
           port: 22
           script : |
             sudo su

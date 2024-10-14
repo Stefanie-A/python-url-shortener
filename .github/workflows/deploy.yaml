@@ -12,9 +12,10 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.HOST_USERNAME }}
           key: ${{ secrets.EC2_KEY }}
+          port: 22
           script : |
             sudo su
-            sudo apt update -y && \
+            sudo apt update -y
             sudo apt install docker.io -y
             sudo apt install docker-compose-plugin -y
             docker pull stefnie/api-image:latest

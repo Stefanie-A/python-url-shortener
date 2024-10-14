@@ -6,8 +6,7 @@ jobs:
   EC2 Deployment:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to EC2
+      - name: Deploy to EC2      
       - uses: bitovi/github-actions-deploy-docker-to-ec2@v1.0.1
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}

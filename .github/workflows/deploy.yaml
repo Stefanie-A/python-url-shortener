@@ -9,10 +9,10 @@ jobs:
       - name: checkout code
         uses: easingthemes/ssh-deploy@main
         env:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.HOST_USERNAME }}
-          key: ${{ secrets.EC2_KEY }}
-          
+          REMOTE_HOST: ${{ secrets.EC2_HOST }}
+          REMOTE_USER: ${{ secrets.HOST_USERNAME }}
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_KEY }}
+
           # host: ${{ secrets.EC2_HOST }}
           # username: ${{ secrets.HOST_USERNAME }}
           # key: ${{ secrets.EC2_KEY }}

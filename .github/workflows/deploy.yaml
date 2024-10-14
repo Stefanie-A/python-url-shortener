@@ -7,11 +7,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
-        uses: actions/checkout@v4         
+        uses: actions/checkout@v4
+      - name: Write ssh key
+        run: |
+          echo "${{ secrets.EC2_KEY }}" > ~/ec2_key.pem
+          chmod 600 ~/ec2_key.pem   
       - name: SSH into EC2 and run deployment
         run: |
-          ssh -i ${{ secrets.EC2_KEY }} ec2-user@${{ secrets.EC2_HOST }} << EOF
-            sudo apt update -y
+          ssh -o StrictHostKeyChecking=no -i ~/ec2_key.pem ec2-user@${{ secrets.EC2_HOST }} << EOF
+            sudo apt update -y && \
             sudo apt install docker.io -y
             sudo apt install docker-compose-plugin
             docker pull stefnie/api-image:latest

@@ -4,7 +4,8 @@ Python URI shortener
 import hashlib
 import boto3
 
-dynamoDB = boto3.resource('dynamodb')
+region_name = 'us-east-1'
+dynamoDB = boto3.resource('dynamodb', region_name=region_name)
 table = dynamoDB.Table('newURI')
 
 input_url = input("Enter the URL to shorten: ")

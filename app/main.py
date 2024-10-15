@@ -37,7 +37,7 @@ except Exception as e:
 if __name__ == "__main__":
     try:
         input_url = input("Enter the URL to shorten: ")
-        generate_short_url(input_url)
+        SHORT_URI = generate_short_url(input_url)
         print(f"Shortened URL: {SHORT_URI}")
     except EOFError:
         print("No input provided. Please run the script again.")

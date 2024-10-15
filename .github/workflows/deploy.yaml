@@ -1,21 +1,49 @@
 name: Deploy to ec2
 on:
-  [workflow_dispatch]
+  push: 
+    branches:
+      - main 
 
 jobs:
   Deployment:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout code
-        uses: easingthemes/ssh-deploy@main
-        env:
-          REMOTE_HOST: ${{ secrets.EC2_HOST }}
-          REMOTE_USER: ${{ secrets.HOST_USERNAME }}
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_KEY }}
+      - uses: actions/checkout@v4
+        name: checkout repo
 
-          # host: ${{ secrets.EC2_HOST }}
-          # username: ${{ secrets.HOST_USERNAME }}
-          # key: ${{ secrets.EC2_KEY }}
+      - uses: burnett01/rsync-deployments@23a557dceb19f9bb960ef40cf75cab5e9b37ec1f
+        name: deploy
+        with:
+          switches: -avzr --delete
+          remote_host: ${{ secrets.EC2_HOST }}
+          remote_user: ${{ secrets.HOST_USERNAME }}
+          remote_key: ${{ secrets.EC2_KEY }}
+
+      - uses: JimCronqvist/action-ssh@7737f1192ddd8376686e9d6354dea44592c942bf
+        name: Execute ssh
+        with:
+          hosts: ${{ secrets.HOST_USERNAME }}@${{ secrets.EC2_HOST }}
+          privatekey: ${{ secrets.EC2_KEY }}
+          command: |
+                sudo apt update -y
+                sudo apt install docker.io -y
+                sudo apt install docker-compose-plugin -y
+                docker pull stefnie/api-image:latest
+                docker pull stefnie/uri-image:latest
+                docker-compose -f compose.yaml up -d
+
+
+
+
+
+
+
+
+
+
+
+
+
           # port: 22
           # script : |
           #   sudo su

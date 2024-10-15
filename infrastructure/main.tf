@@ -66,6 +66,8 @@ resource "aws_instance" "web_server" {
   key_name = aws_key_pair.ssh-key.key_name
   user_data                   = <<-EOF
                 #!/bin/bash
+                mkdir myapp
+                cd myapp
                 sudo apt update -y
                 sudo apt install docker.io -y
                 EOF

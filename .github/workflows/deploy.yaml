@@ -18,7 +18,7 @@ jobs:
           remote_host: ${{ secrets.EC2_HOST }}
           remote_user: ec2-user
           remote_key: ${{ secrets.EC2_KEY }}
-
+          remote_path: /myapp
       - uses: JimCronqvist/action-ssh@master
         name: Execute ssh
         with:

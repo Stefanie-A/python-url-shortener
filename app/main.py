@@ -2,8 +2,8 @@
 Python URI shortener
 """
 import hashlib
-import boto3
 import uuid
+import boto3
 
 region_name = 'us-east-1'
 dynamoDB = boto3.resource('dynamodb', region_name=region_name)
@@ -23,7 +23,7 @@ def generate_short_url(long_url):
 def update_table(table):
     table.put_item(
             Item={
-                'id': str(uuid.uuid),
+                'id': str(uuid.uuid()),
                 'shorturl' : SHORT_URI
                 }
         )

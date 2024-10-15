@@ -25,8 +25,6 @@ jobs:
           hosts: ${{ secrets.HOST_USERNAME }}@${{ secrets.EC2_HOST }}
           privatekey: ${{ secrets.EC2_KEY }}
           command: |
-                sudo apt update -y
-                sudo apt install docker.io -y
                 sudo apt install docker-compose-plugin -y
                 docker pull stefnie/api-image:latest
                 docker pull stefnie/uri-image:latest

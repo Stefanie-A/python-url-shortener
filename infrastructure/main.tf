@@ -18,7 +18,9 @@ data "aws_vpc" "default" {
 }
 
 variable "key_name" {
-    
+  description = "Name of the SSH key pair"
+  type        = string
+  default     = "my-key"
 }
 
 resource "tls_private_key" "key-pair" {

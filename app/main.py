@@ -3,12 +3,11 @@ Python URI shortener
 """
 import hashlib
 import boto3
+import uuid
 
 region_name = 'us-east-1'
 dynamoDB = boto3.resource('dynamodb', region_name=region_name)
 table = dynamoDB.Table('newURI')
-
-input_url = input("Enter the URL to shorten: ")
 
 def generate_short_url(long_url):
     """
@@ -21,14 +20,10 @@ def generate_short_url(long_url):
     base_url = "http://short_url/" #replace with your domain name
     return f"{base_url}{short_url}"
 
-
-SHORT_URI = url_shortener(input_url)
-
-
 def update_table(table):
     table.put_item(
             Item={
-                'id': '1',
+                'id': str(uuid.uuid),
                 'shorturl' : SHORT_URI
                 }
         )
@@ -40,6 +35,11 @@ except Exception as e:
 
 
 if __name__ == "__main__":
-    print(f"Shortened URL: {SHORT_URI}" )
-
-
+    try:
+        input_url = input("Enter the URL to shorten: ")
+        url_shortener(input_url)
+        print(f"Shortened URL: {SHORT_URI}")
+    except EOFError:
+        print("No input provided. Please run the script again.")
+    except Exception as e:
+        print(f"Error: {e}")

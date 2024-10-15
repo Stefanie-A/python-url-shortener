@@ -8,7 +8,7 @@ import boto3
 # Initialize DynamoDB
 region_name = 'us-east-1'
 dynamoDB = boto3.resource('dynamodb', region_name=region_name)
-table = dynamoDB.Table('newURI')
+table = dynamoDB.Table('DynamoDB-Terraform')
 
 def generate_short_url(long_url):
     """
@@ -27,7 +27,7 @@ def update_table(table, short_url):
     try:
         table.put_item(
             Item={
-                'id': str(uuid.uuid4()),
+                'Id': str(uuid.uuid4()),
                 'shorturl': short_url
             }
         )

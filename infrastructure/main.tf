@@ -79,7 +79,7 @@ resource "aws_instance" "web_server" {
 }
 
 resource "aws_dynamodb_table" "dynamodb-table" {
-  name           = "DynamoDB-Terraform"
+  name           = "uri-table"
   billing_mode   = "PROVISIONED"
   read_capacity  = 20
   write_capacity = 20

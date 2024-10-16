@@ -8,7 +8,7 @@ import boto3
 # Initialize DynamoDB
 region_name = 'us-east-1'
 dynamoDB = boto3.resource('dynamodb', region_name=region_name)
-table = dynamoDB.Table('DynamoDB-Terraform')
+table = dynamoDB.Table('uri-table')
 
 def generate_short_url(long_url):
     """

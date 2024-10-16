@@ -16,9 +16,9 @@ def generate_short_url(long_url):
     """
     hash_object = hashlib.md5(long_url.encode())
     hash_digest = hash_object.hexdigest()
-    short_url = hash_digest[:5]
+    short_uri = hash_digest[:5]
     base_url = "http://short_url/"  # Replace with your actual domain name
-    return f"{base_url}{short_url}"
+    return f"{base_url}{short_uri}"
 
 def update_table(table, short_url):
     """

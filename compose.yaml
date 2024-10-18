@@ -11,6 +11,6 @@ services:
     image: stefnie/api-image:latest
     container_name: build2
     ports:
-      - 8036:80
+      - 80:80
     volumes:
       - ./api.py /app

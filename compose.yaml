@@ -4,14 +4,12 @@ services:
     image: stefnie/uri-image:latest
     container_name: build1
     volumes:
-      - ./main.py:/app/main.py
+      - ./app/main.py:/app/main.py
 
 
   backend:
     image: stefnie/api-image:latest
     container_name: build2
     network_mode: "host"
-    ports:
-      - 80:80
     volumes:
-      - ./api.py:/app/api.py
+      - ./app/api.py:/app/api.py

@@ -17,6 +17,5 @@ def get_url():
         }
     except Exception as e:
         return {
-            "statusCode": statusCode,
             "error": str(e)
         }

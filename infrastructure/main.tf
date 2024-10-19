@@ -76,9 +76,9 @@ resource "aws_instance" "web_server" {
                 #!/bin/bash
                 mkdir myapp
                 cd myapp
-                sudo apt update -y
-                sudo apt install docker.io -y
-                EOF
+                apt update -y
+                apt install docker.io -y
+              EOF
   user_data_replace_on_change = true
   tags = {
     Name = "mox"

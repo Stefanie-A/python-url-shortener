@@ -10,44 +10,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         name: checkout repo
-
-      - uses: burnett01/rsync-deployments@7.0.1
-        name: deploy
-        with:
-          switches: -avzr --delete
-          remote_host: ${{ secrets.EC2_HOST }}
-          remote_user: ec2-user
-          remote_key: ${{ secrets.EC2_KEY }}
-          remote_path: /myapp
-      - uses: JimCronqvist/action-ssh@master
-        name: Execute ssh
-        with:
-          hosts: ${{ secrets.HOST_USERNAME }}@${{ secrets.EC2_HOST }}
-          privatekey: ${{ secrets.EC2_KEY }}
-          command: |
-                sudo apt install docker-compose-plugin -y
+        with: 
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.HOST_USERNAME}}
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |      
+                sudo apt install docker-compose -y
+                sudo apt install python3-pip
+                pip install awscli --break-system-packages
                 docker pull stefnie/api-image:latest
                 docker pull stefnie/uri-image:latest
                 docker-compose -f compose.yaml up -d
-
-
-
-
-
-
-
-
-
-
-
-
-
-          # port: 22
-          # script : |
-          #   sudo su
-          #   sudo apt update -y
-          #   sudo apt install docker.io -y
-          #   sudo apt install docker-compose-plugin -y
-          #   docker pull stefnie/api-image:latest
-          #   docker pull stefnie/uri-image:latest
-          #   docker-compose -f compose.yaml up -d
+                git checkout - *
+                git checkout main
+                git pull origin main

@@ -1,26 +1,5 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~>5.0"
-    }
-  }
-  required_version = ">= 1.2.0"
-}
-
-provider "aws" {
-  region = "us-east-1"
-
-}
-
 data "aws_vpc" "default" {
   default = true
-}
-
-variable "key_name" {
-  description = "Name of the SSH key pair"
-  type        = string
-  default     = "my-key"
 }
 
 resource "tls_private_key" "key-pair" {
@@ -71,7 +50,7 @@ resource "aws_instance" "web_server" {
   ami                         = "ami-0866a3c8686eaeeba"
   instance_type               = "t2.micro"
   vpc_security_group_ids      = [aws_security_group.instance.id]
-  key_name = aws_key_pair.ssh-key.key_name
+  key_name                    = aws_key_pair.ssh-key.key_name
   user_data                   = <<-EOF
                 #!/bin/bash
                 mkdir myapp
@@ -114,15 +93,4 @@ resource "aws_dynamodb_table" "dynamodb-table" {
   tags = {
     Name = "newURI"
   }
-}
-
-output "public_ip" {
-  value       = aws_instance.web_server.public_ip
-  description = "The public IP address of the web server"
-}
-
-output "private-key" {
-  value     = tls_private_key.key-pair.private_key_pem
-  sensitive = true
-
 }

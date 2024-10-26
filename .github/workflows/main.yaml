@@ -1,0 +1,25 @@
+name: Deployment
+on:
+  push:
+    branches:
+      - main
+
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: checkout repo
+
+      - name: appleboyssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.HOST_USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            cd app
+            git checkout — *
+            git checkout main
+            git pull origin main

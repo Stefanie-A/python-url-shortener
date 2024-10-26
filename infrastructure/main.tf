@@ -51,14 +51,6 @@ resource "aws_instance" "web_server" {
   instance_type               = "t2.micro"
   vpc_security_group_ids      = [aws_security_group.instance.id]
   key_name                    = aws_key_pair.ssh-key.key_name
-  user_data                   = <<-EOF
-                #!/bin/bash
-                mkdir myapp
-                cd myapp
-                apt update -y
-                apt install docker.io -y
-              EOF
-  user_data_replace_on_change = true
   tags = {
     Name = "mox"
   }

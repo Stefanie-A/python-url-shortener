@@ -20,6 +20,6 @@ jobs:
             username: ${{ secrets.HOST_USERNAME }}
             key: ${{ secrets.PRIVATE_KEY }}
             script: |
-                cd app
+                cd app/python-uri-shortener
                 echo "Welcome!"
                 git pull origin main

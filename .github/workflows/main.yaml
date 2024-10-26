@@ -10,14 +10,17 @@ jobs:
     name: Deploy branch main
     runs-on: ubuntu-latest
     steps:
-      - name: appleboy-ssh
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.HOST_USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          script: |
-            cd app
-            git checkout — *
-            git checkout main
-            git pull origin main
+        - name: Check out the repository
+          uses: actions/checkout@v4
+
+        - name: appleboy-ssh
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.HOST_USERNAME }}
+            key: ${{ secrets.PRIVATE_KEY }}
+            script: |
+                cd app
+                git checkout -- *
+                git checkout main
+                git pull origin main

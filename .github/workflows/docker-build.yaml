@@ -33,6 +33,6 @@ jobs:
       - name: run containers
         run: |
           docker login -u stefnie -p ${{ secrets.docker_hub_token }}
-          docker pull tefnie/api-image:latest
-          docker pull tefnie/api-image:latest
+          docker pull stefnie/api-image:latest
+          docker pull stefnie/api-image:latest
           docker-compose -f compose.yaml up -d

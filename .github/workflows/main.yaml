@@ -19,6 +19,9 @@ jobs:
         - name: Check out the repository
           uses: actions/checkout@v4
 
+        - name: verify credentials
+          run: aws s3 ls
+          
         - name: appleboy-ssh
           uses: appleboy/ssh-action@master
           with:

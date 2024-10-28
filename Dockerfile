@@ -19,4 +19,4 @@ RUN pip install -r requirements.txt
 
 COPY ./app/api.py .
 
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]

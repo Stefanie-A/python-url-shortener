@@ -7,6 +7,11 @@ from main import table
 
 app = FastAPI()
 
+@app.get("/")
+def home():
+    return {
+        "Welcome!"
+    }
 @app.get("/urls")
 def get_url():
     try:

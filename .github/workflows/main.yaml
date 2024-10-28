@@ -23,7 +23,7 @@ jobs:
                 cd python-uri-shortener
                 echo "Welcome!"
                 git pull origin main
-                docker system prune -a
+                docker system prune -a -f
                 docker pull nginx:latest
                 docker login -u stefnie -p ${{ secrets.docker_hub_token }}
                 docker pull stefnie/api-image:latest

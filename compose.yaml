@@ -18,7 +18,5 @@ services:
     image: nginx:latest
     container_name: nginx
     network_mode: "host"
-    ports:
-      - 80:80
     volumes:
       - ./nginx/conf.d/default.conf:/etc/nginx/sites-available/default

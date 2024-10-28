@@ -23,6 +23,7 @@ jobs:
                 cd app/python-uri-shortener
                 echo "Welcome!"
                 git pull origin main
+                sudo apt install docker.io -y
                 docker pull nginx:latest
                 sudo systemctl start nginx
                 docker login -u stefnie -p ${{ secrets.docker_hub_token }}

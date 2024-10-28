@@ -24,6 +24,7 @@ jobs:
                 echo "Welcome!"
                 git pull origin main
                 docker system prune -a -f
+                docker-compose down
                 docker pull nginx:latest
                 docker login -u stefnie -p ${{ secrets.docker_hub_token }}
                 docker pull stefnie/api-image:latest

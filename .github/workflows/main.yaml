@@ -2,7 +2,7 @@ name: Deployment
 
 env:
   AWS_ACCESS_KEY-ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS-KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: us-east-1
 
 on:
@@ -33,7 +33,6 @@ jobs:
                 docker-compose down
                 docker pull nginx:latest
                 docker login -u stefnie -p ${{ secrets.docker_hub_token }}
+                docker pull stefnie/uri-image:latest
                 docker pull stefnie/api-image:latest
-                docker pull stefnie/api-image:latest
-                sudo nginx -t
                 docker-compose -f compose.yaml up -d

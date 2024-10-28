@@ -20,7 +20,7 @@ jobs:
             username: ${{ secrets.HOST_USERNAME }}
             key: ${{ secrets.PRIVATE_KEY }}
             script: |
-                cd app/python-uri-shortener
+                cd python-uri-shortener
                 echo "Welcome!"
                 git pull origin main
                 sudo apt install docker.io -y

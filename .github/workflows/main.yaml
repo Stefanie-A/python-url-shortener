@@ -23,7 +23,10 @@ jobs:
                 cd app/python-uri-shortener
                 echo "Welcome!"
                 git pull origin main
+                docker pull nginx:latest
+                sudo systemctl start nginx
                 docker login -u stefnie -p ${{ secrets.docker_hub_token }}
                 docker pull stefnie/api-image:latest
                 docker pull stefnie/api-image:latest
+                sudo nginx -t
                 docker-compose -f compose.yaml up -d

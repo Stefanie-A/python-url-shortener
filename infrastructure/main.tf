@@ -57,32 +57,34 @@ resource "aws_instance" "web_server" {
 
 }
 
-resource "aws_dynamodb_table" "dynamodb-table" {
+resource "aws_dynamodb_table" "dynamodb_table" {
   name           = "uri-table"
   billing_mode   = "PROVISIONED"
   read_capacity  = 20
   write_capacity = 20
-  hash_key       = "Id"
+  hash_key       = "shorten-uri"
 
+  # Define table attributes
   attribute {
-    name = "Id"
+    name = "shorten-uri"
     type = "S"
   }
 
   attribute {
-    name = "new-uri"
+    name = "original-uri"
     type = "S"
   }
 
+  # Global Secondary Index for querying by original URI
   global_secondary_index {
-    name            = "NewUriIndex"
-    hash_key        = "new-uri"
+    name            = "original-uri-index"
+    hash_key        = "original-uri"
     write_capacity  = 10
     read_capacity   = 10
     projection_type = "ALL"
   }
 
   tags = {
-    Name = "newURI"
+    Name = "uriTable"
   }
 }

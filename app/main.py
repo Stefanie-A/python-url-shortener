@@ -1,5 +1,5 @@
 """
-Python URI shortener
+Python URI Shortener
 """
 import hashlib
 import uuid
@@ -20,34 +20,45 @@ def generate_short_url(long_url):
     base_url = "http://short_url/"  # Replace with your actual domain name
     return f"{base_url}{short_uri}"
 
-def update_table(table, short_url):
+def save_to_dynamodb(original_url, short_url):
     """
-    Update the DynamoDB table with the generated short URL.
+    Save the generated short URL to the DynamoDB table.
     """
     try:
         table.put_item(
             Item={
-                'Id': str(uuid.uuid4()),
-                'shorturl': short_url
+                'Id': str(uuid.uuid4()),  # Unique ID for the entry
+                'shorten-uri': short_url,
+                'original-url': original_url  # Match table schema
             }
         )
         print(f"Successfully updated table with short URL: {short_url}")
     except Exception as e:
         print(f"Error updating table: {e}")
 
-if __name__ == "__main__":
+def main():
+    """
+    Main function to handle input, URL shortening, and saving to DynamoDB.
+    """
     try:
         # Get URL input from the user
-        input_url = input("Enter the URL to shorten: ")
-        
+        input_url = input("Enter the URL to shorten: ").strip()
+        if not input_url:
+            raise ValueError("No URL provided. Please run the script again.")
+
         # Generate short URL
-        SHORT_URI = generate_short_url(input_url)
-        print(f"Shortened URL: {SHORT_URI}")
-        
-        # Update DynamoDB table
-        update_table(table, SHORT_URI)
-        
+        short_url = generate_short_url(input_url)
+        print(f"Shortened URL: {short_url}")
+
+        # Save short URL to DynamoDB
+        save_to_dynamodb(input_url, short_url)
+
+    except ValueError as ve:
+        print(ve)
     except EOFError:
         print("No input provided. Please run the script again.")
     except Exception as e:
         print(f"Error: {e}")
+
+if __name__ == "__main__":
+    main()

@@ -13,7 +13,7 @@ resource "aws_key_pair" "ssh-key" {
 
 }
 
-resource "aws_security_group" "instance" {
+resource "aws_security_group" "instance-scg" {
   name = "fox"
 
   ingress {
@@ -46,10 +46,10 @@ resource "aws_security_group" "instance" {
   }
 
 }
-resource "aws_instance" "web_server" {
-  ami                         = "ami-0866a3c8686eaeeba"
+resource "aws_instance" "var.ec2-instance" {
+  ami                         = var.ami
   instance_type               = "t2.micro"
-  vpc_security_group_ids      = [aws_security_group.instance.id]
+  vpc_security_group_ids      = [aws_security_group.instance-scg.id]
   key_name                    = aws_key_pair.ssh-key.key_name
   tags = {
     Name = "mox"
@@ -58,7 +58,7 @@ resource "aws_instance" "web_server" {
 }
 
 resource "aws_dynamodb_table" "dynamodb_table" {
-  name           = "uri-table"
+  name           = var.dynamodb_table_name
   billing_mode   = "PROVISIONED"
   read_capacity  = 20
   write_capacity = 20
@@ -86,5 +86,53 @@ resource "aws_dynamodb_table" "dynamodb_table" {
 
   tags = {
     Name = "uriTable"
+  }
+}
+
+# Remote Backend configuration
+resource "aws_s3_bucket" "terraform_state" {
+  bucket = var.dynamodb_state_table
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_s3_bucket_versioning" "bucket_versioning" {
+  bucket = aws_s3_bucket.terraform_state.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
+  bucket = aws_s3_bucket.terraform_state.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "public_access" {
+  bucket                  = aws_s3_bucket.terraform_state.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+
+resource "aws_dynamodb_table" "terraform_locks" {
+  name         = var.dynamodb_state_table
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+
+  tags = {
+    Name = "terraform-locks"
   }
 }

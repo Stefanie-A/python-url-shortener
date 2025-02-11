@@ -1,7 +1,6 @@
 variable "remote_state_bucket" {
     description = "The name of the s3 bucket to store the terraform state file"
     type = string
-    default = "terraform-statefile12525"
 }
 
 variable "dynamodb_state_table" {

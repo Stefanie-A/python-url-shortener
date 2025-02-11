@@ -38,7 +38,7 @@ resource "aws_dynamodb_table" "dynamodb_table" {
 resource "aws_s3_bucket" "file_upload_bucket" {
   bucket = var.file_upload_bucket
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 
@@ -70,7 +70,7 @@ resource "aws_s3_bucket_public_access_block" "bucket_public_access_block" {
 
 # Remote Backend configuration
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = var.dynamodb_state_table
+  bucket = var.remote_state_bucket
   lifecycle {
     prevent_destroy = true
   }

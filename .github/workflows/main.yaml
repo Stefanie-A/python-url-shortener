@@ -7,7 +7,7 @@ on:
 
 jobs:
   Deploy:
-    name: Deploy branch main
+    name: Deploy lambda
     runs-on: ubuntu-latest
     steps:
         - name: Check out the repository
@@ -23,20 +23,25 @@ jobs:
         - name: verify credentials
           run: aws s3 ls
 
-        - name: appleboy-ssh
-          uses: appleboy/ssh-action@master
+        - name: set up python
+          uses: actions/setup-python@v4
           with:
-            host: ${{ secrets.HOST }}
-            username: ${{ secrets.HOST_USERNAME }}
-            key: ${{ secrets.PRIVATE_KEY }}
-            script: |
-                cd python-uri-shortener
-                echo "Welcome!"
-                git pull origin main
-                docker system prune -a -f
-                docker-compose down
-                docker pull nginx:latest
-                docker login -u stefnie -p ${{ secrets.docker_hub_token }}
-                docker pull stefnie/uri-image:latest
-                docker pull stefnie/api-image:latest
-                docker-compose -f compose.yaml up -d
+            python-version: '3.12'
+
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+
+        - name: Zip the code
+          run: |
+            cd app 
+            zip -r ../deployment-package.zip .
+
+        - name: Upload to s3
+          run: |
+            aws s3 cp deployment-package.zip s3://file-upload21125/deployment-package.zip
+        
+        - name: Deploy lambda
+          run: |
+            aws lambda update-function-code --function-name lambda --s3-bucket file-upload21125 --s3-key deployment-package.zip

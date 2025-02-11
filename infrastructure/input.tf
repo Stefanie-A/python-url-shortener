@@ -27,7 +27,7 @@ variable "lambda_name" {
 
 variable "lambda_handler" {
   description = "The name of the Lambda function handler"
-  default = "main.py"
+  default = "main.lambda_handler"
 }
 
 variable "file_upload_bucket" {

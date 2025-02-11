@@ -28,11 +28,6 @@ jobs:
           with:
             python-version: '3.12'
 
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-
         - name: Zip the code
           run: |
             cd app 
@@ -44,4 +39,7 @@ jobs:
         
         - name: Deploy lambda
           run: |
-            aws lambda update-function-code --function-name lambda --s3-bucket file-upload21125 --s3-key deployment-package.zip
+            aws lambda update-function-code \
+            --function-name lambda \
+            --s3-bucket file-upload21125 \
+            --s3-key deployment-package.zip

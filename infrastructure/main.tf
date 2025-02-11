@@ -1,61 +1,6 @@
-data "aws_vpc" "default" {
-  default = true
-}
-
-resource "tls_private_key" "key-pair" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "ssh-key" {
-  key_name   = var.key_name
-  public_key = tls_private_key.key-pair.public_key_openssh
-
-}
-
-resource "aws_security_group" "instance-scg" {
-  name = "fox"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-}
-resource "aws_instance" "var.ec2-instance" {
-  ami                         = var.ami
-  instance_type               = "t2.micro"
-  vpc_security_group_ids      = [aws_security_group.instance-scg.id]
-  key_name                    = aws_key_pair.ssh-key.key_name
-  tags = {
-    Name = "mox"
-  }
-
-}
+# data "aws_vpc" "default" {
+#   default = true
+# }
 
 resource "aws_dynamodb_table" "dynamodb_table" {
   name           = var.dynamodb_table_name
@@ -134,5 +79,70 @@ resource "aws_dynamodb_table" "terraform_locks" {
 
   tags = {
     Name = "terraform-locks"
+  }
+}
+
+#Lambda Funciton
+data "aws_iam_policy_document" "lambda_policy" {
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "lambda_role" {
+  name = "lambda_execution_role"
+  assume_role_policy = data.aws_iam_policy_document.lambda_policy.json
+}
+
+
+data "archive_file" "lambda_zip" {
+  excludes = [
+    ".git/*",
+    ".terraform/*",
+    ".vscode/*",
+    "terraform.tfstate*",
+    "terraform.tfvars*",
+    "*.tf",
+    "*.tfvars",
+    "*.gitignore",
+    "*.gitmodules",
+    "*.DS_Store",
+    "*.zip",
+    "*.tar.gz",
+    "*.tar",
+    "*.exe",
+    "*.bin",
+    "*.tf",
+    "*.tfstate",
+    "*.tfstate.backup",
+    "*.tfstate.backup.*",
+    ".terraform",
+    ".git",
+    ".gitignore",
+  ]
+  type        = "zip"
+  source_dir  = "${path.module}/./app"
+  output_path = "${path.module}/deployment-package.zip"
+}
+
+resource "aws_lambda_function" "lambda-func" {
+  function_name = var.lambda_name
+  role          = aws_iam_role.lambda_role.arn
+  handler       = "main.handler"
+  runtime       = "python3.12"
+
+  filename      = data.archive_file.lambda_zip.output_path
+
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+
+  environment {
+    variables = {
+      foo = "bar"
+    }
   }
 }

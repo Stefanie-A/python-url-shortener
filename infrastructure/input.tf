@@ -16,10 +16,10 @@ variable "key_name" {
   default = "new-key"
 }
 
-variable "instance_type" {
-  description = "The type of instance to launch"
-#   default = "t2.micro"
-}
+# variable "instance_type" {
+#   description = "The type of instance to launch"
+# #   default = "t2.micro"
+# }
 
 variable "region" {
   description = "The region to launch the instance"
@@ -41,14 +41,14 @@ variable "ami" {
 #   default = ["sg-0c1f7b7b4b4b4b4b4"]
 # }
 
-variable "tags" {
-  description = "The tags to attach to the instance"
-  type = map(string)
-  default = {
-    Name = "mox"
-  }
+# variable "tags" {
+#   description = "The tags to attach to the instance"
+#   type = map(string)
+#   default = {
+#     Name = "mox"
+#   }
   
-}
+# }
 
 variable "dynamodb_table_name" {
   description = "The name of the dynamodb table"
@@ -60,4 +60,9 @@ variable "ec2_instance" {
   description = "The name of the ec2 instance"
   type = string
   default = "foxy"  
+}
+
+variable "lambda_name" {
+  description = "The name of the Lambda function"
+  default = "lambda"
 }

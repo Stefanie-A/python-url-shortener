@@ -30,7 +30,7 @@ jobs:
 
         - name: Zip the code
           run: |
-            cd app 
+            cd infrastructure/app 
             zip -r ../deployment-package.zip .
 
         - name: Upload to s3

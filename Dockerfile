@@ -6,7 +6,7 @@ COPY ./infrastructure/app/requirements.txt .
 
 RUN pip install -r ./infrastructure/app/requirements.txt
 
-COPY ./app/main.py .
+COPY ./infrastructure/app/main.py .
 
 CMD ["python", "main.py"]
 
@@ -17,6 +17,6 @@ COPY ./infrastructure/app/requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY ./app/api.py .
+COPY ./infrastructure/app/api.py .
 
 CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--reload"]

@@ -34,3 +34,9 @@ variable "file_upload_bucket" {
   description = "The name of the s3 bucket to upload files"
   type = string  
 }
+
+variable "api_gateway_name" {
+  description = "The name of the API Gateway"
+  default = "api-gateway"
+  
+}

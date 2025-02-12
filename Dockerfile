@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY infrastructure/app/requirements.txt .
 
-RUN pip install -r infrastructure/app/requirements.txt
+RUN pip install -r requirements.txt
 
 COPY infrastructure/app/main.py .
 

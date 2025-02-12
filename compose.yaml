@@ -4,7 +4,7 @@ services:
     image: stefnie/uri-image:latest
     container_name: build1
     volumes:
-      - infrastructure/app/main.py:/app/main.py
+      - ./infrastructure/app/main.py:/app/main.py
 
 
   backend:
@@ -12,7 +12,7 @@ services:
     container_name: build2
     network_mode: "host"
     volumes:
-      - infrastructure/app/api.py:/app/api.py
+      - ./infrastructure/app/api.py:/app/api.py
 
   # nginx:
   #   image: nginx:latest

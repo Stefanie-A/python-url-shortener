@@ -129,7 +129,7 @@ data "aws_iam_policy_document" "lambda_policy" {
 }
 
 resource "aws_iam_role" "lambda_role" {
-  name = "lambda_execution_role"
+  name               = "lambda_execution_role"
   assume_role_policy = data.aws_iam_policy_document.lambda_policy.json
 }
 
@@ -170,7 +170,7 @@ resource "aws_lambda_function" "lambda-func" {
   handler       = var.lambda_handler
   runtime       = "python3.12"
 
-  filename      = data.archive_file.lambda_zip.output_path
+  filename = data.archive_file.lambda_zip.output_path
 
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
@@ -183,7 +183,7 @@ resource "aws_lambda_function" "lambda-func" {
 
 #API Gateway
 resource "aws_api_gateway_rest_api" "api" {
-  name        = var.api_gateway_name
+  name = var.api_gateway_name
 }
 
 resource "aws_api_gateway_resource" "api_resource" {
@@ -225,9 +225,9 @@ resource "aws_lambda_permission" "apigw_lambda" {
 }
 
 resource "aws_api_gateway_api_key" "api_key" {
-  name = "url-shortener-api-key"
+  name        = "url-shortener-api-key"
   description = "API Key for URL Shortener"
-  enabled = true
+  enabled     = true
 }
 
 

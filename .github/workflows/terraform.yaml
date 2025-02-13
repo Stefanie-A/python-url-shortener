@@ -10,7 +10,7 @@ on:
     branches:
       - main
     paths:
-      - infrastructure/**
+      - 'infrastructure/**''
 
 env:
   BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE }}

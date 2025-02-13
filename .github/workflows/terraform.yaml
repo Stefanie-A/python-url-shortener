@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'infrastructure/app/**'
    
   pull_request:
     branches:
@@ -54,6 +56,14 @@ jobs:
         run: |
           cd infrastructure
           terraform plan
+
+      - name: Terraform Import Existing Resources
+        run: |
+          cd infrastructure
+          terraform import aws_dynamodb_table.dynamodb_table uri-table
+          terraform import aws_dynamodb_table.terraform_locks terraform-state-lock
+          terraform import aws_s3_bucket.file_upload_bucket file-upload21325
+          terraform import aws_iam_role.lambda_role lambda_execution_role
 
       - name: Terraform Apply
         run: |

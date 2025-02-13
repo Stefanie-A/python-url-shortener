@@ -36,16 +36,26 @@ jobs:
           terraform_version: 1.10.4
 
       - name: Terraform Init
-        run: terraform init -backend-config="bucket=$BUCKET_TF_STATE" -backend-config="key=terraform.tfstate" -backend-config="region=us-east-1" -chdir=infrastructure
+        run: |
+          cd infrastructure
+          terraform init -backend-config="bucket=$BUCKET_TF_STATE" -backend-config="key=terraform.tfstate" -backend-config="region=us-east-1" -chdir=infrastructure
 
       - name: Terraform Format
-        run: terraform fmt -check -diff -recursive infrastructure
+        run: |
+          cd infrastructure
+          terraform fmt -check -diff -recursive
 
       - name: Terraform Validate
-        run: terraform validate -chdir=infrastructure
+        run: |
+          cd infrastructure
+          terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -chdir=infrastructure
+        run: |
+          cd infrastructure
+          terraform plan
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -chdir=infrastructure
+        run: |
+          cd infrastructure
+          terraform apply -auto-approve

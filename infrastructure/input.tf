@@ -1,7 +1,7 @@
 variable "remote_state_bucket" {
   description = "The name of the s3 bucket to store the terraform state file"
   type        = string
-  default     = "terraform-state21325"
+  default     = "terraform-state21425"
 }
 
 variable "dynamodb_state_table" {
@@ -39,6 +39,6 @@ variable "file_upload_bucket" {
 
 variable "api_gateway_name" {
   description = "The name of the API Gateway"
-  default     = "api-gateway-21325"
+  default     = "api-gateway-21425"
 
 }

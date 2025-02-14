@@ -41,11 +41,11 @@ jobs:
 
         - name: Upload to s3
           run: |
-            aws s3 cp deployment-package.zip s3://file-upload21325/deployment-package.zip
+            aws s3 cp deployment-package.zip s3://${{ secrets.FILE_UPLOAD_BUCKET }}/deployment-package.zip
         
         - name: Deploy lambda
           run: |
             aws lambda update-function-code \
             --function-name lambda \
-            --s3-bucket file-upload21325 \
+            --s3-bucket ${{ secrets.FILE_UPLOAD_BUCKET }} \
             --s3-key deployment-package.zip

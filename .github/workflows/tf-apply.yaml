@@ -62,7 +62,7 @@ jobs:
           cd infrastructure
           terraform import aws_dynamodb_table.dynamodb_table uri-table
           terraform import aws_dynamodb_table.terraform_locks terraform-state-lock
-          terraform import aws_s3_bucket.file_upload_bucket ${{ secrets.FILE_UPLOAD_BUCKET }}
+          terraform import aws_s3_bucket.file_upload_bucket $FILE_UPLOAD_BUCKET
           terraform import aws_iam_role.lambda_role lambda_execution_role
 
       - name: Terraform Apply

@@ -36,10 +36,10 @@ jobs:
           terraform init -backend-config="bucket=${{ secrets.BUCKET_TF_STATE }}" -backend-config="key=terraform.tfstate" -backend-config="region=us-east-1"
 
 
-      - name: Show Terraform State
-        run: |
-          cd infrastructure
-          terraform state list
+      # - name: Show Terraform State
+      #   run: |
+      #     cd infrastructure
+      #     terraform state list
 
       - name: Terraform Destroy
         run: |

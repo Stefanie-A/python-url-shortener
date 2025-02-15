@@ -41,7 +41,7 @@ jobs:
 
         - name: Upload to s3
           run: |
-            aws s3 cp deployment-package.zip s3://file-upload2125/deployment-package.zip
+            aws s3 cp deployment-package.zip s3://file-upload21525/deployment-package.zip
         
         - name: Deploy lambda
           run: |

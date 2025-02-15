@@ -40,7 +40,7 @@ jobs:
       - name: Terraform Init
         run: |
           cd infrastructure
-          terraform init -backend-config="bucket=$BUCKET_TF_STATE" -backend-config="key=terraform.tfstate" -backend-config="region=us-east-1"
+          terraform init
 
       - name: Terraform Format
         run: |
@@ -69,3 +69,4 @@ jobs:
         run: |
           cd infrastructure
           terraform apply -auto-approve
+          terraform init -backend-config="bucket=$BUCKET_TF_STATE" -backend-config="key=terraform.tfstate" -backend-config="region=us-east-1"

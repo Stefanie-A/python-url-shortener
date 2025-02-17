@@ -6,7 +6,7 @@ terraform {
     }
   }
   required_version = ">= 1.8.5"
-  backend "s3" { }
+  # backend "s3" { }
   #   bucket = "terraform-state21525"
   #   key    = "terraform.tfstate"
   #   region = "us-east-1"

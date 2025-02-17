@@ -1,4 +1,4 @@
-name: Infrastructure Deployment
+name: Infrastructure
 
 on:
   workflow_dispatch:
@@ -13,13 +13,9 @@ on:
     paths:
       - 'infrastructure/**'
 
-env:
-  BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE }}
-  TF_LOG: INFO  # Set the Terraform log level to INFO
-
 jobs:
   terraform:
-    name: Terraform
+    name: Terraform provision
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -33,7 +29,7 @@ jobs:
           aws-region: us-east-1
       
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.10.4
 
@@ -69,4 +65,7 @@ jobs:
         run: |
           cd infrastructure
           terraform apply -auto-approve
-          terraform init -backend-config="bucket={{ secrets.$BUCKET_TF_STATE }}" -backend-config="key=terraform.tfstate" -backend-config="region=us-east-1"
+          terraform init -backend-config="bucket={{ secrets.$BUCKET_TF_STATE }}" \
+          -backend-config="key=terraform.tfstate" \
+          -backend-config="region=us-east-1"
+          

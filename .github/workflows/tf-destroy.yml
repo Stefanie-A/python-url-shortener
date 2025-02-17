@@ -2,9 +2,6 @@ name: Terraform Destroy
 
 on:
   workflow_dispatch:
-  # pull_request:
-  #   types:
-  #     - closed When PR is closed
     branches:
       - main
   schedule:
@@ -30,6 +27,14 @@ jobs:
         with:
           terraform_version: 1.10.4
 
+      - name: Terraform init
+        run: |
+          cd infrastructure
+          terraform init \
+          -backend-config="bucket=${{ secrets.BUCKET_TF_STATE }}" \
+          -backend-config="key=terraform.tfstate" \
+          -backend-config="region=us-east-1"
+
       - name: Terraform Import Existing Resources
         run: |
           cd infrastructure
@@ -37,7 +42,6 @@ jobs:
           terraform import aws_s3_bucket.terraform_state ${{ secrets.BUCKET_TF_STATE }}
          
       - name: Terraform Destroy
-        if: github.event_name == 'workflow_dispatch'
         run: |
           cd infrastructure
           terraform destroy -auto-approve

@@ -39,6 +39,7 @@ jobs:
         run: |
           cd infrastructure
           terraform import aws_s3_bucket.file_upload_bucket file-upload21525
+          terraform import aws_s3_bucket_versioning.versioning file-upload21525
           terraform import aws_dynamodb_table.terraform_locks terraform-state-lock
           terraform import aws_iam_role.lambda_role lambda_execution_role
           terraform import aws_lambda_function.lambda_func lambda

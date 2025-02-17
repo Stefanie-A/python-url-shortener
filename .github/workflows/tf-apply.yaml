@@ -33,7 +33,7 @@ jobs:
         with:
           terraform_version: 1.10.4
 
-      - name:
+      - name: Boostrap S3 Bucket
         run: |
           aws s3api create-bucket --bucket ${{ secrets.BUCKET_TF_STATE }} --region us-east-1
           aws s3api put-bucket-versioning --bucket ${{ secrets.BUCKET_TF_STATE }} --versioning-configuration Status=Enabled
@@ -43,7 +43,7 @@ jobs:
       - name: Terraform Init
         run: |
           cd infrastructure
-          terraform init -reconfigure\
+          terraform init \
           -backend-config="bucket=${{ secrets.BUCKET_TF_STATE }}" \
           -backend-config="key=terraform.tfstate" \
           -backend-config="region=us-east-1"

@@ -39,6 +39,6 @@ variable "file_upload_bucket" {
 
 variable "api_gateway_name" {
   description = "The name of the API Gateway"
-  default     = "api-gateway-21525"
+  default     = "api21525"
 
 }

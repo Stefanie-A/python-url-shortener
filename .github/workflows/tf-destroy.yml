@@ -30,18 +30,14 @@ jobs:
         with:
           terraform_version: 1.10.4
 
-      - name: Terraform Init
+      - name: Terraform Import Existing Resources
         run: |
           cd infrastructure
-          terraform init -backend-config="bucket=${{ secrets.BUCKET_TF_STATE }}" -backend-config="key=terraform.tfstate" -backend-config="region=us-east-1"
-
-
-      # - name: Show Terraform State
-      #   run: |
-      #     cd infrastructure
-      #     terraform state list
-
+          terraform import aws_dynamodb_table.terraform_locks terraform-state-lock
+          terraform import aws_s3_bucket.terraform_state ${{ secrets.BUCKET_TF_STATE }}
+         
       - name: Terraform Destroy
+        if: github.event_name == 'workflow_dispatch'
         run: |
           cd infrastructure
           terraform destroy -auto-approve

@@ -73,8 +73,8 @@ jobs:
       #     terraform import aws_iam_role.lambda_role lambda_execution_role
 
       - name: Terraform Apply
-        run: |
-          if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch'
+        run: |          
           cd infrastructure
           terraform apply -auto-approve
           

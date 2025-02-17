@@ -18,7 +18,7 @@ variable "region" {
 variable "dynamodb_table_name" {
   description = "The name of the dynamodb table"
   type        = string
-  default     = "uri-table"
+  default     = "url-table"
 }
 
 variable "lambda_name" {

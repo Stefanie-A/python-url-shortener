@@ -43,7 +43,7 @@ jobs:
           terraform import aws_iam_role.lambda_role lambda_execution_role
           terraform import aws_lambda_function.lambda_func lambda
           terraform import aws_api_gateway_rest_api.api_gateway api-gateway-21525
-          terraform import aws_dynamodb_table.url_table url-table
+          terraform import aws_dynamodb_table.dynamodb_table url-table
              
       - name: Terraform Destroy
         run: |

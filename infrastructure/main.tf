@@ -164,7 +164,7 @@ data "archive_file" "lambda_zip" {
   output_path = "${path.module}/deployment-package.zip"
 }
 
-resource "aws_lambda_function" "lambda-func" {
+resource "aws_lambda_function" "lambda_func" {
   function_name = var.lambda_name
   role          = aws_iam_role.lambda_role.arn
   handler       = var.lambda_handler
@@ -182,7 +182,7 @@ resource "aws_lambda_function" "lambda-func" {
 }
 
 #API Gateway
-resource "aws_api_gateway_rest_api" "api" {
+resource "aws_api_gateway_rest_api" "api_gateway" {
   name = var.api_gateway_name
 }
 

@@ -2,11 +2,7 @@ name: Terraform Destroy
 
 on:
   workflow_dispatch:
-    branches:
-      - main
-  schedule:
-    - cron: '0 0 * * *'  # Every midnight (adjust as necessary)
-
+   
 jobs:
   terraform-destroy:
     name: Terraform Destroy

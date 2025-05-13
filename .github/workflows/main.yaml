@@ -1,49 +1,46 @@
-name: Lambda deployment
+name: Infrastructure Setup
 on:
   workflow_dispatch:
     
 
 jobs:
-  Deploy:
-    name: Deploy lambda
+  build:
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
+
     steps:
-        - name: Check out the repository
-          uses: actions/checkout@v4
+      - name: Check out the repository
+        uses: actions/checkout@v4
 
-        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v4
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: us-east-1
+      - name: Configure AWS Credentials for OIDC
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          audience: sts.amazonaws.com.cn
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::902839103466:role/OpenId-connect
 
-        - name: verify credentials
-          run: aws s3 ls
+      #Terraform Setup
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v3.0.0
+        with:
+          terraform_version: 1.10.4
 
-        - name: set up python
-          uses: actions/setup-python@v4
-          with:
-            python-version: '3.12'
-        
-        - name: Install dependencies
-          run: |
-            cd infrastructure/app
-            pip install -r requirements.txt -t .
+      - name: Install make
+        run: sudo apt-get install -y make
 
+      - name: Terraform init
+        run: make init
 
-        - name: Zip the code
-          run: |
-            cd infrastructure/app 
-            zip -r ../../deployment-package.zip .
+      - name: Terraform fmt
+        run: make fmt
 
-        - name: Upload to s3
-          run: |
-            aws s3 cp deployment-package.zip s3://file-upload21525/deployment-package.zip
-        
-        - name: Deploy lambda
-          run: |
-            aws lambda update-function-code \
-            --function-name lambda \
-            --s3-bucket file-upload21525 \
-            --s3-key deployment-package.zip
+      - name: Terraform validate
+        run: make validate
+
+      - name: Terraform plan
+        run: make plan
+
+      - name: Terraform apply
+        run: make up

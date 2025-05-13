@@ -23,7 +23,7 @@ variable "dynamodb_table_name" {
 
 variable "lambda_name" {
   description = "The name of the Lambda function"
-  default     = "lambda"
+  default     = "url-function"
 }
 
 variable "lambda_handler" {

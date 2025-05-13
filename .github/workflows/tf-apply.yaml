@@ -2,11 +2,7 @@ name: Infrastructure
 
 on:
   workflow_dispatch:
-    branches:
-      - main
-    # paths:
-    #   - 'infrastructure/app/**'
-   
+    
   pull_request:
     branches:
       - main

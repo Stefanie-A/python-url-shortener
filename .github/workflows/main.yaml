@@ -1,9 +1,7 @@
 name: Lambda deployment
 on:
   workflow_dispatch:
-    branches:
-      - main
-
+    
 
 jobs:
   Deploy:

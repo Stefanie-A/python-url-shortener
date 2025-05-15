@@ -180,7 +180,116 @@ resource "aws_api_gateway_api_key" "api_key" {
   enabled     = true
 }
 
+resource "aws_ecr_repository" "ecr_repository" {
+  name                 = "url-repo"
+  image_tag_mutability = "MUTABLE"
 
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_subnet" "main" {
+  vpc_id     = data.aws_vpc.default.id
+  cidr_block = "10.0.1.0/24"
+
+  tags = {
+    Name = "Main"
+  }
+}
+
+resource "aws_security_group" "ecs_security_group" {
+  name        = "ecs_security_group"
+  description = "Allow HTTP and HTTPS traffic"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [aws_subnet.main.cidr_block]
+    description = "Allow HTTP traffic"
+  }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [aws_subnet.main.cidr_block]
+    description = "Allow HTTPS traffic"
+  }
+  # egress {
+  #   from_port   = 0
+  #   to_port     = 0
+  #   protocol    = "-1"
+  #   cidr_blocks = ["0.0.0/0"]
+  #   description = "Allow all outbound traffic"
+  # }
+}
+
+resource "aws_ecs_cluster" "ecs_cluster" {
+  name = "url-shortener-cluster"
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+
+}
+
+resource "aws_ecs_task_definition" "service" {
+  family = "service"
+  container_definitions = jsonencode([
+    {
+      name      = "first"
+      image     = "service-first"
+      cpu       = 10
+      memory    = 512
+      essential = true
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+        }
+      ]
+    },
+    {
+      name      = "second"
+      image     = "service-second"
+      cpu       = 10
+      memory    = 256
+      essential = true
+      portMappings = [
+        {
+          containerPort = 443
+          hostPort      = 443
+        }
+      ]
+    }
+  ])
+
+  volume {
+    name      = "service-storage"
+    host_path = "/ecs/service-storage"
+  }
+
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:ecs.availability-zone in [us-west-2a, us-west-2b]"
+  }
+}
+
+resource "aws_ecs_service" "name" {
+  name            = "url-shortener-service"
+  task_definition = aws_ecs_task_definition.service.arn
+  cluster         = aws_ecs_cluster.ecs_cluster.id
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = [aws_subnet.main.id]
+    security_groups  = [aws_security_group.ecs_security_group.id]
+    assign_public_ip = true
+  }
+}
 
 
 

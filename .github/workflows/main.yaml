@@ -44,3 +44,19 @@ jobs:
 
       - name: Terraform apply
         run: make up
+
+      #Pushing Docker Image to ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1.0.0
+        
+      - name: Build Docker image
+        run: |
+          docker build -t url-repo .
+          docker tag url-repo:latest 902839103466.dkr.ecr.us-east-1.amazonaws.com/url-repo:latest
+      - name: Push Docker image to ECR
+        run: |
+          docker push 902839103466.dkr.ecr.us-east-1.amazonaws.com/url-repo:latest
+
+         
+      

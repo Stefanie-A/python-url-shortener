@@ -191,7 +191,7 @@ resource "aws_ecr_repository" "ecr_repository" {
 
 resource "aws_subnet" "main" {
   vpc_id     = data.aws_vpc.default.id
-  cidr_block = "10.0.1.0/24"
+  cidr_block = "172.31.48.0/20" 
 
   tags = {
     Name = "Main"
@@ -207,23 +207,23 @@ resource "aws_security_group" "ecs_security_group" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = [aws_subnet.main.cidr_block]
+    cidr_blocks = ["0.0.0.0/0"]
     description = "Allow HTTP traffic"
   }
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = [aws_subnet.main.cidr_block]
+    cidr_blocks = ["0.0.0.0/0"]
     description = "Allow HTTPS traffic"
   }
-  # egress {
-  #   from_port   = 0
-  #   to_port     = 0
-  #   protocol    = "-1"
-  #   cidr_blocks = ["0.0.0/0"]
-  #   description = "Allow all outbound traffic"
-  # }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
+  }
 }
 
 resource "aws_ecs_cluster" "ecs_cluster" {
@@ -236,6 +236,10 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 }
 
 resource "aws_ecs_task_definition" "service" {
+  requires_compatibilities = ["FARGATE"]
+  network_mode = "awsvpc"
+  cpu = "256"
+  memory = "512"
   family = "service"
   container_definitions = jsonencode([
     {
@@ -268,16 +272,12 @@ resource "aws_ecs_task_definition" "service" {
 
   volume {
     name      = "service-storage"
-    host_path = "/ecs/service-storage"
+
   }
 
-  placement_constraints {
-    type       = "memberOf"
-    expression = "attribute:ecs.availability-zone in [us-west-2a, us-west-2b]"
-  }
 }
 
-resource "aws_ecs_service" "name" {
+resource "aws_ecs_service" "ecs" {
   name            = "url-shortener-service"
   task_definition = aws_ecs_task_definition.service.arn
   cluster         = aws_ecs_cluster.ecs_cluster.id

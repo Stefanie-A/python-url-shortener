@@ -191,7 +191,7 @@ resource "aws_ecr_repository" "ecr_repository" {
 
 resource "aws_subnet" "main" {
   vpc_id     = data.aws_vpc.default.id
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "10.0.1.0/24"
 
   tags = {
     Name = "Main"

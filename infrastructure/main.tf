@@ -262,32 +262,25 @@ resource "aws_ecs_task_definition" "task_definition" {
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
-  family = "service"
+  family = "url-repo-task"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   container_definitions = jsonencode([
     {
-      name      = "my-app-container"
-      image     = "image:latest"
-      cpu       = 10
-      memory    = 512
+      name      = "url-repo-app"
+      image     = "${aws_ecr_repository.ecr_repository.repository_url}:latest"
       essential = true
       portMappings = [
         {
           containerPort = 8000
           hostPort      = 8000
+          protocol      = "tcp"
         }
       ]
     }
   ])
-
-  volume {
-    name      = "service-storage"
-
-  }
-
 }
 
-resource "aws_ecs_service" "ecs_service" {
+ resource "aws_ecs_service" "ecs_service" {
   name            = "url-repo-service"
   task_definition = aws_ecs_task_definition.task_definition.arn
   cluster         = aws_ecs_cluster.ecs_cluster.id
@@ -299,6 +292,7 @@ resource "aws_ecs_service" "ecs_service" {
     security_groups  = [aws_security_group.ecs_security_group.id]
     assign_public_ip = true
   }
+  depends_on = [aws_iam_role.ecs_task_execution_role] 
 }
 
 

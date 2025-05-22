@@ -243,7 +243,14 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
-      Action = "sts:AssumeRole",
+      Action: [
+        "sts:AssumeRole",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage",
+        "ecr:GetAuthorizationToken",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+        ],
       Effect = "Allow",
       Principal = {
         Service = "ecs-tasks.amazonaws.com"
@@ -271,8 +278,8 @@ resource "aws_ecs_task_definition" "task_definition" {
       essential = true
       portMappings = [
         {
-          containerPort = 8000
-          hostPort      = 8000
+          containerPort = 80
+          hostPort      = 80
           protocol      = "tcp"
         }
       ]

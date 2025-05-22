@@ -230,7 +230,7 @@ resource "aws_security_group" "ecs_security_group" {
 }
 
 resource "aws_ecs_cluster" "ecs_cluster" {
-  name = "url-shortener-cluster"
+  name = "url-cluster"
   setting {
     name  = "containerInsights"
     value = "enabled"

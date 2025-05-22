@@ -182,11 +182,14 @@ resource "aws_api_gateway_api_key" "api_key" {
 
 resource "aws_ecr_repository" "ecr_repository" {
   name                 = "url-repo"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
+  image_tag_mutability = "IMMUTABLE"
+  tags = {
+    Name = "url-repo"
   }
+  lifecycle {
+    prevent_destroy = false
+  }
+  
 }
 
 resource "aws_subnet" "main" {
@@ -235,36 +238,43 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 
 }
 
-resource "aws_ecs_task_definition" "service" {
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecsTaskExecutionRole"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_ecs_task_definition" "task_definition" {
   requires_compatibilities = ["FARGATE"]
   network_mode = "awsvpc"
   cpu = "256"
   memory = "512"
   family = "service"
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   container_definitions = jsonencode([
     {
-      name      = "first"
-      image     = "service-first"
+      name      = "my-app-container"
+      image     = "image:latest"
       cpu       = 10
       memory    = 512
       essential = true
       portMappings = [
         {
-          containerPort = 80
-          hostPort      = 80
-        }
-      ]
-    },
-    {
-      name      = "second"
-      image     = "service-second"
-      cpu       = 10
-      memory    = 256
-      essential = true
-      portMappings = [
-        {
-          containerPort = 443
-          hostPort      = 443
+          containerPort = 8000
+          hostPort      = 8000
         }
       ]
     }
@@ -277,11 +287,11 @@ resource "aws_ecs_task_definition" "service" {
 
 }
 
-resource "aws_ecs_service" "ecs" {
-  name            = "url-shortener-service"
-  task_definition = aws_ecs_task_definition.service.arn
+resource "aws_ecs_service" "ecs_service" {
+  name            = "url-repo-service"
+  task_definition = aws_ecs_task_definition.task_definition.arn
   cluster         = aws_ecs_cluster.ecs_cluster.id
-  desired_count   = 1
+  desired_count   = 2
   launch_type     = "FARGATE"
 
   network_configuration {

@@ -1,2 +1,5 @@
 boto3
 fastapi[all]
+uvicorn
+pydantic
+mangum

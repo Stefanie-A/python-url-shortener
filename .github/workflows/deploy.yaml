@@ -57,10 +57,6 @@ jobs:
       - name: Push Docker image to ECR
         run: |
           docker push 902839103466.dkr.ecr.us-east-1.amazonaws.com/url-repo:latest
-      - name: Deploy to ECS
-        run: |
-          aws ecs update-service --cluster url-cluster --service url-repo-service --force-new-deployment
-          aws ecs wait services-stable --cluster url-cluster --services url-repo-service
-
+      
          
       

@@ -31,12 +31,6 @@ variable "lambda_handler" {
   default     = "main.lambda_handler"
 }
 
-variable "file_upload_bucket" {
-  description = "The name of the s3 bucket to upload files"
-  type        = string
-  default     = "file-upload21525"
-}
-
 variable "api_gateway_name" {
   description = "The name of the API Gateway"
   default     = "api21525"

@@ -2,6 +2,165 @@ data "aws_vpc" "default" {
   default = true
 }
 
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+  filter {
+    name   = "map-public-ip-on-launch"
+    values = ["true"]
+  }
+}
+resource "aws_internet_gateway" "igw" {
+  vpc_id = data.aws_vpc.default.id
+}
+
+resource "aws_subnet" "private_sub" {
+  count             = 2
+  vpc_id            = data.aws_vpc.default.id
+  cidr_block        = "172.31.${count.index + 10}.0/24"
+  availability_zone = data.aws_availability_zones.available.names[count.index]
+  tags = {
+    Name = "Main"
+  }
+}
+
+resource "aws_eip" "nat" {
+  depends_on = [aws_internet_gateway.igw]
+}
+
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = data.aws_subnets.default.ids[0]
+  depends_on    = [aws_internet_gateway.igw]
+}
+
+resource "aws_route_table" "privatesub-rt" {
+  vpc_id = data.aws_vpc.default.id
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
+}
+resource "aws_route_table_association" "privatesub-rt-assoc" {
+  count          = length(aws_subnet.private_sub)
+  subnet_id      = aws_subnet.private_sub[count.index].id
+  route_table_id = aws_route_table.privatesub-rt.id
+}
+
+
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_id            = data.aws_vpc.default.id
+  service_name      = "com.amazonaws.us-east-1.ecr.api"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = aws_subnet.private_sub[*].id
+  security_group_ids = [aws_security_group.ecs_security_group.id]
+  private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id            = data.aws_vpc.default.id
+  service_name      = "com.amazonaws.us-east-1.ecr.dkr"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = aws_subnet.private_sub[*].id
+  security_group_ids = [aws_security_group.ecs_security_group.id]
+  private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id            = data.aws_vpc.default.id
+  service_name      = "com.amazonaws.us-east-1.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = [aws_route_table.privatesub-rt.id]
+}
+
+resource "aws_security_group" "elb_security_group" {
+  name        = "elb_security_group"
+  description = "Allow traffic to ECS tasks"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+
+  }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "ecs_security_group" {
+  name        = "ecs_security_group"
+  description = "Allow traffic to ECS tasks"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.elb_security_group.id]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "ecs_security_group"
+  }
+}
+
+resource "aws_lb" "main_alb" {
+  name               = "main-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.elb_security_group.id]
+  subnets            = data.aws_subnets.default.ids
+}
+
+resource "aws_lb_target_group" "app_tg" {
+  name        = "app-tg"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = data.aws_vpc.default.id
+  target_type = "ip"
+  health_check {
+    path                = "/"
+    matcher             = 200
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+}
+
+resource "aws_lb_listener" "http_listener" {
+  load_balancer_arn = aws_lb.main_alb.arn
+  port              = 80
+  protocol          = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app_tg.arn
+  }
+}
 resource "aws_dynamodb_table" "dynamodb_table" {
   name           = var.dynamodb_table_name
   billing_mode   = "PROVISIONED"
@@ -32,38 +191,6 @@ resource "aws_dynamodb_table" "dynamodb_table" {
   tags = {
     Name = "uriTable"
   }
-}
-
-#S3 file upload
-resource "aws_s3_bucket" "file_upload_bucket" {
-  bucket = var.file_upload_bucket
-  lifecycle {
-    prevent_destroy = false
-  }
-}
-
-resource "aws_s3_bucket_versioning" "versioning" {
-  bucket = aws_s3_bucket.file_upload_bucket.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_server_side_encryption" {
-  bucket = aws_s3_bucket.file_upload_bucket.id
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
-resource "aws_s3_bucket_public_access_block" "bucket_public_access_block" {
-  bucket                  = aws_s3_bucket.file_upload_bucket.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
 }
 
 #Lambda Funciton
@@ -189,45 +316,11 @@ resource "aws_ecr_repository" "ecr_repository" {
   lifecycle {
     prevent_destroy = false
   }
-  
+
 }
 
-resource "aws_subnet" "main" {
-  vpc_id     = data.aws_vpc.default.id
-  cidr_block = "172.31.48.0/20" 
 
-  tags = {
-    Name = "Main"
-  }
-}
 
-resource "aws_security_group" "ecs_security_group" {
-  name        = "ecs_security_group"
-  description = "Allow HTTP and HTTPS traffic"
-  vpc_id      = data.aws_vpc.default.id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow HTTP traffic"
-  }
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow HTTPS traffic"
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all outbound traffic"
-  }
-}
 
 resource "aws_ecs_cluster" "ecs_cluster" {
   name = "url-cluster"
@@ -261,17 +354,56 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# IAM Role for ECS Task (Permissions your application needs, e.g., DynamoDB, S3)
+resource "aws_iam_role" "ecs_task_role" {
+  name = "ecs-task-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+# Attach policies for your application (e.g., DynamoDB,)
+# IMPORTANT: Replace these with the actual ARNs or create custom policies for least privilege.
+resource "aws_iam_role_policy_attachment" "ecs_task_dynamodb_access" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_s3_access" {
+  role       = aws_iam_role.ecs_task_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess" # Adjust for least privilege
+}
+
+# CloudWatch Log Group for ECS Task Logs
+resource "aws_cloudwatch_log_group" "app_logs" {
+  name              = "/ecs/ecs-task"
+  retention_in_days = 7
+}
+
 resource "aws_ecs_task_definition" "task_definition" {
   requires_compatibilities = ["FARGATE"]
-  network_mode = "awsvpc"
-  cpu = "256"
-  memory = "512"
-  family = "url-repo-task"
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "512"
+  family                   = "url-repo-task"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
   container_definitions = jsonencode([
     {
-      name      = "url-repo-app"
+      name      = "url-container"
       image     = "${aws_ecr_repository.ecr_repository.repository_url}:latest"
+      cpu       = 256
+      memory    = 512
       essential = true
       portMappings = [
         {
@@ -280,23 +412,46 @@ resource "aws_ecs_task_definition" "task_definition" {
           protocol      = "tcp"
         }
       ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.app_logs.name
+          "awslogs-region"        = "us-east-1" # Change to your region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+      environment = [
+        {
+          name  = "DYNAMODB_TABLE_NAME"
+          value = aws_dynamodb_table.dynamodb_table.name
+        },
+        {
+          name  = "LAMBDA_NAME"
+          value = aws_lambda_function.lambda_func.function_name
+        }
+      ]
     }
   ])
 }
-
- resource "aws_ecs_service" "ecs_service" {
+resource "aws_ecs_service" "ecs_service" {
   name            = "url-repo-service"
   task_definition = aws_ecs_task_definition.task_definition.arn
   cluster         = aws_ecs_cluster.ecs_cluster.id
   desired_count   = 2
-  launch_type     = "FARGATE"
+  launch_type     ="FARGATE"
 
   network_configuration {
-    subnets          = [aws_subnet.main.id]
+    subnets          = aws_subnet.private_sub[*].id
     security_groups  = [aws_security_group.ecs_security_group.id]
-    assign_public_ip = true
+    assign_public_ip = false
   }
-  depends_on = [aws_iam_role.ecs_task_execution_role] 
+  load_balancer {
+    target_group_arn = aws_lb_target_group.app_tg.arn
+    container_name   = "url-container"
+    container_port   = 80
+  }
+
+  depends_on = [aws_lb_listener.http_listener, aws_iam_role.ecs_task_execution_role]
 }
 
 

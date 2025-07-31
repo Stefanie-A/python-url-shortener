@@ -34,21 +34,21 @@ jobs:
           terraform_version: 1.10.4
 
       - name: Terraform Init
+        working-directory: infrastructure
         run: |
-          cd /infrastructure
           terraform init
       - name: Terraform Format and Validate
+        working-directory: infrastructure
         run: |
-          cd /infrastructure
           terraform fmt -check
           terraform validate
       - name: Terraform Plan
+        working-directory: infrastructure
         run: |
-          cd /infrastructure
           terraform plan -out=tfplan -input=false
       - name: Terraform Apply
+        working-directory: infrastructure
         run: |
-          cd /infrastructure
           terraform apply -auto-approve
 
   Push_to_ECR:

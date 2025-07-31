@@ -35,20 +35,20 @@ jobs:
 
       - name: Terraform Init
         run: |
-          cd ./infrastructure
+          cd infrastructure
           terraform init
       - name: Terraform Format and Validate
         run: |
-          cd ./infrastructure
+          cd infrastructure
           terraform fmt -check
           terraform validate
       - name: Terraform Plan
         run: |
-          cd ./infrastructure
+          cd infrastructure
           terraform plan -out=tfplan -input=false
       - name: Terraform Apply
         run: |
-          cd ./infrastructure
+          cd infrastructure
           terraform apply -auto-approve
 
   Push_to_ECR:

@@ -2,18 +2,24 @@ name: Infrastructure Setup
 on:
   workflow_dispatch:
     
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   build:
-    permissions:
-      contents: read
-      id-token: write
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
 
+      - name: Build Docker image
+        run: docker build -t url-repo:latest .
+
+  Set_Up_Infrastructure:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Configure AWS Credentials for OIDC
         uses: aws-actions/configure-aws-credentials@v4.1.0
         with:
@@ -26,9 +32,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3.0.0
         with:
           terraform_version: 1.10.4
-
-      - name: Install make
-        run: sudo apt-get install -y make
 
       - name: Terraform init
         run: make init
@@ -45,18 +48,32 @@ jobs:
       - name: Terraform apply
         run: make up
 
-      #Pushing Docker Image to ECR
+  Push_to_ECR:
+    runs-on: ubuntu-latest
+    needs: [build, Set_Up_Infrastructure]
+    steps:
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1.0.0
-        
-      - name: Build Docker image
-        run: |
-          docker build -t url-repo .
-          docker tag url-repo:latest 902839103466.dkr.ecr.us-east-1.amazonaws.com/url-repo:latest
+        uses: aws-actions/amazon-ecr-login@v1.0.0        
       - name: Push Docker image to ECR
         run: |
+          docker tag url-repo:latest 902839103466.dkr.ecr.us-east-1.amazonaws.com/url-repo:latest
           docker push 902839103466.dkr.ecr.us-east-1.amazonaws.com/url-repo:latest
+
+  Deploy_to_ECS:
+    runs-on: ubuntu-latest
+    needs: [Set_Up_Infrastructure, Push_to_ECR]
+    steps:
+      - name: Configure AWS Credentials for OIDC
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          audience: sts.amazonaws.com
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::902839103466:role/OpenId-connect
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service --cluster url-repo-cluster --service url-repo-service --force-new-deployment
       
          
       

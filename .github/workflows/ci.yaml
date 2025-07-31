@@ -35,19 +35,19 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: infrastructure
+        working-directory: ./infrastructure
       - name: Terraform Format and Validate
         run: |
           terraform fmt -check
           terraform validate
-        working-directory: infrastructure
+        working-directory: ./infrastructure
       - name: Terraform Plan
-        working-directory: infrastructure
+        working-directory: ./infrastructure
         run: |
           terraform plan -out=tfplan -input=false
       - name: Terraform Apply
         run: terraform apply -auto-approve
-        working-directory: infrastructure
+        working-directory: ./infrastructure
 
   Push_to_ECR:
     runs-on: ubuntu-latest

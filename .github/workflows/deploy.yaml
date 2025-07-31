@@ -34,19 +34,15 @@ jobs:
           terraform_version: 1.10.4
 
       - name: Terraform init
-        run: make init
-
+        run: terraform init
       - name: Terraform fmt
-        run: make fmt
-
+        run: terraform fmt
       - name: Terraform validate
-        run: make validate
-
+        run: terraform validate
       - name: Terraform plan
-        run: make plan
-
+        run: terraform plan
       - name: Terraform apply
-        run: make up
+        run: terraform apply -auto-approve
 
   Push_to_ECR:
     runs-on: ubuntu-latest

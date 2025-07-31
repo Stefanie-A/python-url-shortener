@@ -145,7 +145,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   cpu                      = 1024
   memory                   = 2048
   task_role_arn            = aws_iam_role.ecs_task_role.arn
-  depends_on = [aws_iam_role_policy.ecs_task_policy]
+  depends_on               = [aws_iam_role_policy.ecs_task_policy]
 
   container_definitions = jsonencode([
     {
@@ -164,11 +164,11 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 }
 
 resource "aws_ecs_service" "ecs_service" {
-  name            = "mongodb"
-  cluster         = aws_ecs_cluster.ecs_cluster.id
-  launch_type     = "FARGATE"
-  task_definition = aws_ecs_task_definition.ecs_task_definition.arn
-  desired_count   = 3
+  name                = "mongodb"
+  cluster             = aws_ecs_cluster.ecs_cluster.id
+  launch_type         = "FARGATE"
+  task_definition     = aws_ecs_task_definition.ecs_task_definition.arn
+  desired_count       = 2
   scheduling_strategy = "REPLICA"
 
   ordered_placement_strategy {
@@ -179,7 +179,7 @@ resource "aws_ecs_service" "ecs_service" {
     type       = "memberOf"
     expression = "attribute:ecs.availability-zone in [us-west-2a, us-west-2b]"
   }
-  
+
 }
 
 resource "aws_iam_role" "ecs_task_role" {

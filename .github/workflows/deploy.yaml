@@ -33,16 +33,23 @@ jobs:
         with:
           terraform_version: 1.10.4
 
-      - name: Terraform init
-        run: terraform init
-      - name: Terraform fmt
-        run: terraform fmt
-      - name: Terraform validate
-        run: terraform validate
-      - name: Terraform plan
-        run: terraform plan
-      - name: Terraform apply
-        run: terraform apply -auto-approve
+      - name: Terraform Init
+        run: |
+          cd ./infrastructure
+          terraform init
+      - name: Terraform Format and Validate
+        run: |
+          cd ./infrastructure
+          terraform fmt -check
+          terraform validate
+      - name: Terraform Plan
+        run: |
+          cd ./infrastructure
+          terraform plan -out=tfplan -input=false
+      - name: Terraform Apply
+        run: |
+          cd ./infrastructure
+          terraform apply -auto-approve
 
   Push_to_ECR:
     runs-on: ubuntu-latest

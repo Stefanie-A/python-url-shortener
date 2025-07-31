@@ -1,4 +1,4 @@
-name: Infrastructure Setup
+name: ci pipeline
 on:
   workflow_dispatch:
     
@@ -25,7 +25,7 @@ jobs:
         with:
           audience: sts.amazonaws.com
           aws-region: us-east-1
-          role-to-assume: arn:aws:iam::902839103466:role/OpenId-connect
+          role-to-assume: arn:aws:iam::902839103466:role/openid-role
 
       #Terraform Setup
       - name: Terraform Setup
@@ -69,7 +69,7 @@ jobs:
         with:
           audience: sts.amazonaws.com
           aws-region: us-east-1
-          role-to-assume: arn:aws:iam::902839103466:role/OpenId-connect
+          role-to-assume: arn:aws:iam::902839103466:role/openid-role
 
       - name: Deploy to ECS
         run: |

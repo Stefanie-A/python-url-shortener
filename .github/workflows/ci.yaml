@@ -32,7 +32,13 @@ jobs:
         uses: hashicorp/setup-terraform@v3.0.0
         with:
           terraform_version: 1.10.4
+        
+      - name: Print current path
+        run: pwd
 
+      - name: List contents of infrastructure directory
+        run: ls -la
+        working-directory: infrastructure
       - name: Terraform Init
         run: terraform init
         working-directory: infrastructure

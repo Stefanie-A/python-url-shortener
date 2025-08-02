@@ -26,7 +26,11 @@ jobs:
           audience: sts.amazonaws.com
           aws-region: us-east-1
           role-to-assume: arn:aws:iam::902839103466:role/openid-role
+    
+      - name: Check out the repository
+        uses: actions/checkout@v4
 
+    
       #Terraform Setup
       - name: Terraform Setup
         uses: hashicorp/setup-terraform@v3.0.0

@@ -229,10 +229,10 @@ resource "aws_iam_role_policy" "ecs_task_policy" {
       {
         Effect = "Allow"
         Action = [
-        "ecr:GetAuthorizationToken",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage"
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage"
         ]
         Resource = "arn:aws:ecr:us-east-1:902839103466:repository/*"
       }

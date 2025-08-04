@@ -1,7 +1,33 @@
 data "aws_vpc" "default" {
   default = true
 }
+data "aws_subnet" "default_a" {
+  filter {
+    name   = "default-for-az"
+    values = ["true"]
+  }
 
+  filter {
+    name   = "availability-zone"
+    values = ["us-east-1a"]
+  }
+
+  vpc_id = data.aws_vpc.default.id
+}
+
+data "aws_subnet" "default_b" {
+  filter {
+    name   = "default-for-az"
+    values = ["true"]
+  }
+
+  filter {
+    name   = "availability-zone"
+    values = ["us-east-1b"]
+  }
+
+  vpc_id = data.aws_vpc.default.id
+}
 
 #Lambda Funciton
 data "aws_iam_policy_document" "lambda_policy" {
@@ -118,7 +144,7 @@ resource "aws_api_gateway_api_key" "api_key" {
 }
 
 resource "aws_ecr_repository" "ecr_repository" {
-  name                 = "url-repo"
+  name                 = "url-image"
   image_tag_mutability = "IMMUTABLE"
   tags = {
     Name = "url-repo"
@@ -130,60 +156,56 @@ resource "aws_ecr_repository" "ecr_repository" {
 }
 
 # ECS Cluster and Service
+resource "aws_security_group" "ecs_security_group" {
+  name        = "ecs_security_group"
+  description = "Security group for ECS tasks"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 resource "aws_ecs_cluster" "ecs_cluster" {
-  name = "white-hart"
+  name = "url-repo-cluster"
 
   setting {
     name  = "containerInsights"
     value = "enabled"
   }
 }
-resource "aws_ecs_task_definition" "ecs_task_definition" {
-  family                   = "service"
-  requires_compatibilities = ["FARGATE"]
-  network_mode             = "awsvpc"
-  cpu                      = 1024
-  memory                   = 2048
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
-  depends_on               = [aws_iam_role_policy.ecs_task_policy]
-
-  container_definitions = jsonencode([
-    {
-      name      = "first",
-      image     = "service-first",
-      cpu       = 10,
-      memory    = 512,
-      essential = true,
-      portMappings = [
-        {
-          containerPort = 80
+resource "aws_iam_role" "ecs_execution_role" {
+  name = "ecs_execution_role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
         }
-      ]
-    }
-  ])
-}
-
-resource "aws_ecs_service" "ecs_service" {
-  name                = "mongodb"
-  cluster             = aws_ecs_cluster.ecs_cluster.id
-  launch_type         = "FARGATE"
-  task_definition     = aws_ecs_task_definition.ecs_task_definition.arn
-  desired_count       = 2
-  scheduling_strategy = "REPLICA"
-
-  ordered_placement_strategy {
-    type  = "binpack"
-    field = "cpu"
-  }
-  placement_constraints {
-    type       = "memberOf"
-    expression = "attribute:ecs.availability-zone in [us-west-2a, us-west-2b]"
-  }
-
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
 }
 
 resource "aws_iam_role" "ecs_task_role" {
-  name = "ecstask_role"
+  name = "ecs_task_role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -199,9 +221,8 @@ resource "aws_iam_role" "ecs_task_role" {
 }
 
 resource "aws_iam_role_policy" "ecs_task_policy" {
-  name = "ecstask_policy"
+  name = "ecs_task_policy"
   role = aws_iam_role.ecs_task_role.id
-
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -216,4 +237,47 @@ resource "aws_iam_role_policy" "ecs_task_policy" {
       }
     ]
   })
+}
+resource "aws_ecs_task_definition" "ecs_task_definition" {
+  family                   = "service"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 1024
+  memory                   = 2048
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
+  depends_on = [
+    aws_iam_role.ecs_execution_role,
+    aws_iam_role.ecs_task_role
+  ]
+
+  container_definitions = jsonencode([
+    {
+      name      = "uri-image",
+      image     = "902839103466.dkr.ecr.us-east-1.amazonaws.com/url-image:latest",
+      cpu       = 10,
+      memory    = 512,
+      essential = true,
+      portMappings = [
+        {
+          containerPort = 80
+        }
+      ]
+    }
+  ])
+}
+
+resource "aws_ecs_service" "ecs_service" {
+  name                = "url-repo-service"
+  cluster             = aws_ecs_cluster.ecs_cluster.id
+  launch_type         = "FARGATE"
+  task_definition     = aws_ecs_task_definition.ecs_task_definition.arn
+  desired_count       = 2
+  scheduling_strategy = "REPLICA"
+  network_configuration {
+    subnets          = [data.aws_subnet.default_a.id, data.aws_subnet.default_b.id]
+    security_groups  = [aws_security_group.ecs_security_group.id]
+    assign_public_ip = true
+  }
+
 }

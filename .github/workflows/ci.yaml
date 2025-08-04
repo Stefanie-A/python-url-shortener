@@ -58,6 +58,9 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1.0.0
         env:
           AWS_REGION: us-east-1
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        
       - name: Build Docker image
         run: docker build -t url-image:latest .
 

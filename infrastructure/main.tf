@@ -1,32 +1,23 @@
 data "aws_vpc" "default" {
   default = true
 }
-data "aws_subnet" "default_a" {
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
   filter {
     name   = "default-for-az"
     values = ["true"]
   }
-
-  filter {
-    name   = "availability-zone"
-    values = ["us-east-1a"]
-  }
-
-  vpc_id = data.aws_vpc.default.id
+}
+data "aws_subnet" "default_a" {
+  id = data.aws_subnets.default.ids[0]
 }
 
 data "aws_subnet" "default_b" {
-  filter {
-    name   = "default-for-az"
-    values = ["true"]
-  }
-
-  filter {
-    name   = "availability-zone"
-    values = ["us-east-1b"]
-  }
-
-  vpc_id = data.aws_vpc.default.id
+  id = data.aws_subnets.default.ids[1]
 }
 
 #Lambda Funciton
@@ -203,42 +194,33 @@ resource "aws_iam_role" "ecs_execution_role" {
     ]
   })
 }
-
-resource "aws_iam_role" "ecs_task_role" {
-  name = "ecs_task_role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = "ecs-tasks.amazonaws.com"
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy" "ecs_task_policy" {
-  name = "ecs_task_policy"
-  role = aws_iam_role.ecs_task_role.id
+resource "aws_iam_role_policy" "ecs_execution_policy" {
+  name = "ecs_execution_policy"
+  role = aws_iam_role.ecs_execution_role.id
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
-        Effect = "Allow"
+        Effect = "Allow",
         Action = [
           "ecr:GetAuthorizationToken",
           "ecr:BatchCheckLayerAvailability",
           "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage"
-        ]
-        Resource = "arn:aws:ecr:us-east-1:902839103466:repository/*"
+          "ecr:BatchGetImage",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:CreateLogGroup"
+        ],
+        Resource = "*"
       }
     ]
   })
 }
+resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
+  role       = aws_iam_role.ecs_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
 resource "aws_ecs_task_definition" "ecs_task_definition" {
   family                   = "service"
   requires_compatibilities = ["FARGATE"]
@@ -246,10 +228,8 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   cpu                      = 1024
   memory                   = 2048
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
   depends_on = [
-    aws_iam_role.ecs_execution_role,
-    aws_iam_role.ecs_task_role
+    aws_iam_role.ecs_execution_role
   ]
 
   container_definitions = jsonencode([

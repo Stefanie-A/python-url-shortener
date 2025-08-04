@@ -13,9 +13,6 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker build -t url-image:latest .
-
       - name: Configure AWS Credentials for OIDC
         uses: aws-actions/configure-aws-credentials@v4.1.0
         with:
@@ -61,6 +58,9 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1.0.0
         env:
           AWS_REGION: us-east-1
+      - name: Build Docker image
+        run: docker build -t url-image:latest .
+
       - name: Push Docker image to ECR
         run: |
           docker tag url-image:latest 902839103466.dkr.ecr.us-east-1.amazonaws.com/url-image:latest

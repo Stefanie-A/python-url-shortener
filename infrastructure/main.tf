@@ -1,25 +1,53 @@
-data "aws_vpc" "default" {
-  default = true
-}
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
-
-  filter {
-    name   = "default-for-az"
-    values = ["true"]
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "MyVPC"
   }
 }
-data "aws_subnet" "default_a" {
-  id = data.aws_subnets.default.ids[0]
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.main.id
+  tags = {
+    Name = "MyVpc_Igw"
+  }
 }
 
-data "aws_subnet" "default_b" {
-  id = data.aws_subnets.default.ids[1]
+resource "aws_subnet" "public_subnet_1a" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "us-east-1a"
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "public-subnet_1a"
+  }
 }
 
+resource "aws_subnet" "public_subnet_1b" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "us-east-1a"
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "public-subnet_1b"
+  }
+}
+resource "aws_route_table" "new_rt_table" {
+  vpc_id = aws_vpc.main.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+  tags = {
+    Name = "new route table"
+  }
+}
+resource "aws_route_table_association" "rt_table_association_a" {
+  route_table_id = aws_route_table.new_rt_table.id
+  subnet_id      = aws_subnet.public_subnet_1a.id
+}
+resource "aws_route_table_association" "rt_table_association_b" {
+  route_table_id = aws_route_table.new_rt_table.id
+  subnet_id      = aws_subnet.public_subnet_1b.id
+}
 #Lambda Funciton
 data "aws_iam_policy_document" "lambda_policy" {
   statement {
@@ -150,7 +178,7 @@ resource "aws_ecr_repository" "ecr_repository" {
 resource "aws_security_group" "ecs_security_group" {
   name        = "ecs_security_group"
   description = "Security group for ECS tasks"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = 80
@@ -256,7 +284,7 @@ resource "aws_ecs_service" "ecs_service" {
   desired_count       = 2
   scheduling_strategy = "REPLICA"
   network_configuration {
-    subnets          = [data.aws_subnet.default_a.id, data.aws_subnet.default_b.id]
+    subnets          = [aws_subnet.public_subnet_1a.id, aws_subnet.public_subnet_1b.id]
     security_groups  = [aws_security_group.ecs_security_group.id]
     assign_public_ip = true
   }
